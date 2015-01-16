@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -133,9 +134,15 @@ public class MainActivity3 extends ActionBarActivity
         }
         try
         {
+            if (!pictureFile.exists())
+            {
+                pictureFile.createNewFile();
+            }
             FileOutputStream fos = new FileOutputStream(pictureFile); //TODO: failing here
-            image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            image.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
             fos.close();
+            MediaStore.Images.Media.insertImage(this.getContentResolver(), pictureFile.getAbsolutePath(), pictureFile.getName(), pictureFile.getName());
         } catch (FileNotFoundException e)
         {
             Log.d(TAG, "File not found: " + e.getMessage());
@@ -147,35 +154,40 @@ public class MainActivity3 extends ActionBarActivity
 
     private  File getOutputMediaFile()
     {
-        File mediaStorageDir = new File(Environment.getExternalStorageDirectory()
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory().toString()
                 + "/Android/data/"
                 + getApplicationContext().getPackageName()
-                + "/Files");
+                + "/Files/"); //need to do to this, as writing to the root is not allowed. root is read only
 
 
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists())
         {
-            if (! mediaStorageDir.mkdirs()) //attempt to create directory
+/*            if (! mediaStorageDir.mkdirs()) //attempt to create directory TODO: this is returning false
             {
+
                 return null;
-            }
+            }*/
+            //file.isDirectory() tells if the directory is made, I was going about this a bad way
+            mediaStorageDir.mkdirs();
         }
 
         File mediaFile;
-        String mImageName = "Shipment"+ getFakeOrderNumber() +getCurrentTimeStamp() +".jpg";
-        mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
+        String mImageName = getCurrentTimeStamp() +".jpg";
+        mediaFile = new File(mediaStorageDir.getPath() + mImageName);
         return mediaFile;
     }
 
     public static String getCurrentTimeStamp()
     {
+        String finalString;
         try
         {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String currentTimeStamp = dateFormat.format(new Date()); // Find todays date
-
-            return currentTimeStamp;
+            finalString = currentTimeStamp.replace(":", "");
+            finalString = finalString.replace("-", "");
+            return finalString;
         }
         catch (Exception e) {
             e.printStackTrace();
