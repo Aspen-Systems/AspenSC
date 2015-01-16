@@ -172,4 +172,5 @@ public class SignatureView extends View
         mPath.reset();
     }
 
+
 }

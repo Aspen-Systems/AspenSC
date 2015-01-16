@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -139,10 +140,11 @@ public class MainActivity3 extends ActionBarActivity
                 pictureFile.createNewFile();
             }
             FileOutputStream fos = new FileOutputStream(pictureFile); //TODO: failing here
-            image.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            image.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
             MediaStore.Images.Media.insertImage(this.getContentResolver(), pictureFile.getAbsolutePath(), pictureFile.getName(), pictureFile.getName());
+            Toast.makeText(this.getApplicationContext(), "saved.", Toast.LENGTH_LONG).show();
         } catch (FileNotFoundException e)
         {
             Log.d(TAG, "File not found: " + e.getMessage());
@@ -165,7 +167,6 @@ public class MainActivity3 extends ActionBarActivity
         {
 /*            if (! mediaStorageDir.mkdirs()) //attempt to create directory TODO: this is returning false
             {
-
                 return null;
             }*/
             //file.isDirectory() tells if the directory is made, I was going about this a bad way
@@ -173,7 +174,7 @@ public class MainActivity3 extends ActionBarActivity
         }
 
         File mediaFile;
-        String mImageName = getCurrentTimeStamp() +".jpg";
+        String mImageName = getCurrentTimeStamp() +".PNG";
         mediaFile = new File(mediaStorageDir.getPath() + mImageName);
         return mediaFile;
     }
