@@ -171,4 +171,5 @@ public class SignatureView extends View
         mCanvas.drawPath(mPath, mPaint);
         mPath.reset();
     }
+
 }
