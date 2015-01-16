@@ -69,12 +69,8 @@ public class MainActivity3 extends ActionBarActivity
                 Log.d(TAG, "Save"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
                saveSig(sv.getImage());
             }
-
-
         });
-
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
