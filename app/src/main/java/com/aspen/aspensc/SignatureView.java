@@ -15,8 +15,8 @@ import android.view.View;
 public class SignatureView extends View
 {
     private Path mPath;
-    private Paint mPaint;
-    private Paint bgPaint = new Paint(Color.WHITE);
+    private Paint mPaint; //color of signature
+    private Paint bgPaint = new Paint(Color.WHITE); //color of background
 
     private Bitmap mBitmap;
     private Canvas mCanvas;
@@ -64,7 +64,6 @@ public class SignatureView extends View
         if (mCanvas != null)
         {
             mCanvas.drawColor(Color.WHITE);
-            mCanvas.drawPaint(bgPaint);
             mPath.reset();
             invalidate();
         }
