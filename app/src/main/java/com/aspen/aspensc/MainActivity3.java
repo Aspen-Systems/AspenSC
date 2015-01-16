@@ -100,6 +100,31 @@ public class MainActivity3 extends ActionBarActivity
 
         return super.onOptionsItemSelected(item);
     }
+    //simple example of saving
+/*    public void saveSignature(View view) {
+
+        Bitmap image = sv.getImage();
+            File sd = Environment.getExternalStorageDirectory();
+            File f = new File(sd, getCurrentTimeStamp() + ".jpg");
+
+
+            try {
+                if (sd.canWrite())
+                {
+                    f.createNewFile();
+                    OutputStream os = new FileOutputStream(f);
+                    image.compress(Bitmap.CompressFormat.JPEG, 90, os);
+                    os.close();
+                 }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+         }*/
+
+
+
 
     private void saveSig(Bitmap image)
     {
@@ -135,7 +160,7 @@ public class MainActivity3 extends ActionBarActivity
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists())
         {
-            if (! mediaStorageDir.mkdirs()) //attempt to create directory //TODO: mkdirs isn't working
+            if (! mediaStorageDir.mkdirs()) //attempt to create directory //TODO: mkdirs isn't working UPDATE manifest need permission which is why the file directory was unable to be created. android.permission.WRITE_EXTERNAL_STORAGE
             {
                 return null;
             }
