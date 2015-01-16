@@ -133,7 +133,7 @@ public class MainActivity3 extends ActionBarActivity
         }
         try
         {
-            FileOutputStream fos = new FileOutputStream(pictureFile);
+            FileOutputStream fos = new FileOutputStream(pictureFile); //TODO: failing here
             image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();
         } catch (FileNotFoundException e)
@@ -156,14 +156,14 @@ public class MainActivity3 extends ActionBarActivity
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists())
         {
-            if (! mediaStorageDir.mkdirs()) //attempt to create directory //TODO: mkdirs isn't working UPDATE manifest need permission which is why the file directory was unable to be created. android.permission.WRITE_EXTERNAL_STORAGE
+            if (! mediaStorageDir.mkdirs()) //attempt to create directory
             {
                 return null;
             }
         }
 
         File mediaFile;
-        String mImageName="Shipment"+ getFakeOrderNumber() +getCurrentTimeStamp() +".jpg";
+        String mImageName = "Shipment"+ getFakeOrderNumber() +getCurrentTimeStamp() +".jpg";
         mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
         return mediaFile;
     }
