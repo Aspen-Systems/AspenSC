@@ -41,15 +41,19 @@ public class MainActivity3 extends ActionBarActivity
         Button btnCancel = (Button)findViewById(R.id.btnCancel);
         Button btnSave = (Button)findViewById(R.id.btnSave);
 
-        btnClear.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v) {
+        btnClear.setOnClickListener(new View.OnClickListener()
+        {
+            public void onClick(View v)
+            {
                 Log.d(TAG, "Clear"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
                 sv.clearSignature();
             }
         });
 
-        btnCancel.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v) {
+        btnCancel.setOnClickListener(new View.OnClickListener()
+        {
+            public void onClick(View v)
+            {
                 Log.d(TAG, "Cancel"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
                 //Back to main Activity
 
@@ -58,8 +62,10 @@ public class MainActivity3 extends ActionBarActivity
             }
         });
 
-        btnSave.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v) {
+        btnSave.setOnClickListener(new View.OnClickListener()
+        {
+            public void onClick(View v)
+            {
                 Log.d(TAG, "Save"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
                saveSig(sv.getImage());
             }
@@ -95,18 +101,22 @@ public class MainActivity3 extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void saveSig(Bitmap image) {
+    private void saveSig(Bitmap image)
+    {
         File pictureFile = getOutputMediaFile();
-        if (pictureFile == null) {
+        if (pictureFile == null)
+        {
             Log.d(TAG,
                     "Error creating media file, check storage permissions: ");// e.getMessage());
             return;
         }
-        try {
+        try
+        {
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.PNG, 90, fos);
             fos.close();
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e)
+        {
             Log.d(TAG, "File not found: " + e.getMessage());
         } catch (IOException e) {
             Log.d(TAG, "Error accessing file: " + e.getMessage());
@@ -114,20 +124,19 @@ public class MainActivity3 extends ActionBarActivity
     }
 
 
-    private  File getOutputMediaFile(){
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
+    private  File getOutputMediaFile()
+    {
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory()
                 + "/Android/data/"
                 + getApplicationContext().getPackageName()
                 + "/Files");
 
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
 
         // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
+        if (! mediaStorageDir.exists())
+        {
+            if (! mediaStorageDir.mkdirs()) //attempt to create directory //TODO: mkdirs isn't working
+            {
                 return null;
             }
         }
@@ -156,12 +165,11 @@ public class MainActivity3 extends ActionBarActivity
 
     public static int getFakeOrderNumber()
     {
+        //Normally I should be passing in an orderNumber from the list view before this screen, since that hasn't been created
+        //yet this will be the placeholder
         int orderNumber;
-
         orderNumber = 415323;
-
         return orderNumber;
-
     }
 
     private void ClearSig()
