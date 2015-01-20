@@ -11,12 +11,14 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.io.ByteArrayOutputStream;
+
 
 public class SignatureView extends View
 {
     private Path mPath;
     private Paint mPaint; //color of signature
-    private Paint bgPaint = new Paint(Color.WHITE); //color of background
+    private Paint bgPaint = new Paint(Color.TRANSPARENT); //color of background
 
     private Bitmap mBitmap;
     private Canvas mCanvas;
@@ -75,13 +77,29 @@ public class SignatureView extends View
     }
     public Bitmap getImage()
     {
-        return this.mBitmap;
+        View v = (View) this.getParent();
+        Bitmap b = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+        v.draw(c);
+
+        return b;
     }
+
     public void setImage(Bitmap bitmap)
     {
         this.mBitmap = bitmap;
         this.invalidate();
     }
+
+    public byte[] getBytes() {
+        Bitmap b = getImage();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        b.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        return baos.toByteArray();
+    }
+
     @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight)
     {
