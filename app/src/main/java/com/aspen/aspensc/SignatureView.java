@@ -32,8 +32,8 @@ public class SignatureView extends View
     private float mLastVelocity;
     private float mLastWidth;
     private boolean mUseBezier = true;
-    private float mLastTouchX;
-    private float mLastTouchY;
+    private float mLastX;
+    private float mLastY;
     private float mMaxWidth = 9.0f; //maximum width of stroke (ALSO THE DOT WHEN YOU FIRST PRESS DOWN)
     private float mMinWidth = 3.0f; //minimum width of stroke
     private List<TimedPoint> mPoints;
@@ -171,8 +171,8 @@ public class SignatureView extends View
             case MotionEvent.ACTION_DOWN:
                 mPoints.clear();
                 touchDown(x, y);
-                mLastTouchX = x;
-                mLastTouchY = y;
+                mLastX = x;
+                mLastY = y;
                 addPoint(new TimedPoint(x, y));
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -377,12 +377,12 @@ public class SignatureView extends View
      */
     private void resetDirtyRect(float eventX, float eventY) {
 
-        // The mLastTouchX and mLastTouchY were set when the ACTION_DOWN
+        // The mLastX and mLastY were set when the ACTION_DOWN
         // motion event occurred.
-        mDirtyRect.left = Math.min(mLastTouchX, eventX);
-        mDirtyRect.right = Math.max(mLastTouchX, eventX);
-        mDirtyRect.top = Math.min(mLastTouchY, eventY);
-        mDirtyRect.bottom = Math.max(mLastTouchY, eventY);
+        mDirtyRect.left = Math.min(mLastX, eventX);
+        mDirtyRect.right = Math.max(mLastX, eventX);
+        mDirtyRect.top = Math.min(mLastY, eventY);
+        mDirtyRect.bottom = Math.max(mLastY, eventY);
     }
 
 
