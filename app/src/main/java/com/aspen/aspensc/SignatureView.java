@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -65,7 +66,7 @@ public class SignatureView extends View
             createFakeMotionEvents();
         if (mCanvas != null)
         {
-            mCanvas.drawColor(Color.WHITE);
+            mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             mPath.reset();
             invalidate();
         }
@@ -75,9 +76,9 @@ public class SignatureView extends View
         }
         return true;
     }
-    public Bitmap getImage()
+    public Bitmap getImage(int id)
     {
-        View v = (View) this.getParent();
+        View v = (View) findViewById(id);
         Bitmap b = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(b);
         v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
@@ -92,8 +93,8 @@ public class SignatureView extends View
         this.invalidate();
     }
 
-    public byte[] getBytes() {
-        Bitmap b = getImage();
+    public byte[] getBytes(int id) {
+        Bitmap b = getImage(id);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         b.compress(Bitmap.CompressFormat.PNG, 100, baos);
@@ -112,6 +113,7 @@ public class SignatureView extends View
         if (bitmapHeight < height)
             bitmapHeight = height;
         Bitmap newBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+        //newBitmap.eraseColor(Color.TRANSPARENT);
         Canvas newCanvas = new Canvas();
         newCanvas.setBitmap(newBitmap);
         if (mBitmap != null)
@@ -119,17 +121,11 @@ public class SignatureView extends View
         mBitmap = newBitmap;
         mCanvas = newCanvas;
     }
-    private void createFakeMotionEvents()
-    {
-        MotionEvent downEvent = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+100, MotionEvent.ACTION_DOWN, 1f, 1f ,0);
-        MotionEvent upEvent = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+100, MotionEvent.ACTION_UP, 1f, 1f ,0);
-        onTouchEvent(downEvent);
-        onTouchEvent(upEvent);
-    }
+
     @Override
     protected void onDraw(Canvas canvas)
     {
-        canvas.drawColor(Color.WHITE);
+        canvas.drawColor(Color.TRANSPARENT);
         canvas.drawBitmap(mBitmap, 0, 0, mPaint);
         canvas.drawPath(mPath, mPaint);
     }
@@ -189,6 +185,48 @@ public class SignatureView extends View
         mCanvas.drawPath(mPath, mPaint);
         mPath.reset();
     }
+
+/*    private void addBezier(Bezier curve, float startWidth, float endWidth) {
+        ensureSignatureBitmap();
+        float originalWidth = mPaint.getStrokeWidth();
+        float widthDelta = endWidth - startWidth;
+        float drawSteps = (float) Math.floor(curve.length());
+
+        for (int i = 0; i < drawSteps; i++) {
+            // Calculate the Bezier (x, y) coordinate for this step.
+            float t = ((float) i) / drawSteps;
+            float tt = t * t;
+            float ttt = tt * t;
+            float u = 1 - t;
+            float uu = u * u;
+            float uuu = uu * u;
+
+            float x = uuu * curve.startPoint.x;
+            x += 3 * uu * t * curve.control1.x;
+            x += 3 * u * tt * curve.control2.x;
+            x += ttt * curve.endPoint.x;
+
+            float y = uuu * curve.startPoint.y;
+            y += 3 * uu * t * curve.control1.y;
+            y += 3 * u * tt * curve.control2.y;
+            y += ttt * curve.endPoint.y;
+
+            // Set the incremental stroke width and draw.
+            mPaint.setStrokeWidth(startWidth + ttt * widthDelta);
+            mSignatureBitmapCanvas.drawPoint(x, y, mPaint);
+            expandDirtyRect(x, y);
+        }
+
+        mPaint.setStrokeWidth(originalWidth);
+    }*/
+    private void createFakeMotionEvents()
+    {
+        MotionEvent downEvent = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+100, MotionEvent.ACTION_DOWN, 1f, 1f ,0);
+        MotionEvent upEvent = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+100, MotionEvent.ACTION_UP, 1f, 1f ,0);
+        onTouchEvent(downEvent);
+        onTouchEvent(upEvent);
+    }
+
 
 
 }

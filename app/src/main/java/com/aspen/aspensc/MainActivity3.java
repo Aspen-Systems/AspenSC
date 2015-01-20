@@ -28,6 +28,7 @@ public class MainActivity3 extends ActionBarActivity
     private SignatureView sv;
     private Button btnClear;
     private Button btnCancel;
+
     private Button btnSave;
 
     @Override
@@ -69,7 +70,7 @@ public class MainActivity3 extends ActionBarActivity
             public void onClick(View v)
             {
                 Log.d(TAG, "Save"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
-               saveSig(sv.getImage());
+               saveSig(sv.getImage(R.id.signatureView));
             }
         });
     }
@@ -98,29 +99,6 @@ public class MainActivity3 extends ActionBarActivity
 
         return super.onOptionsItemSelected(item);
     }
-    //simple example of saving
-/*    public void saveSignature(View view) {
-
-        Bitmap image = sv.getImage();
-            File sd = Environment.getExternalStorageDirectory();
-            File f = new File(sd, getCurrentTimeStamp() + ".jpg");
-
-
-            try {
-                if (sd.canWrite())
-                {
-                    f.createNewFile();
-                    OutputStream os = new FileOutputStream(f);
-                    image.compress(Bitmap.CompressFormat.JPEG, 90, os);
-                    os.close();
-                 }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-         }*/
-
 
 
 
@@ -139,12 +117,12 @@ public class MainActivity3 extends ActionBarActivity
             {
                 pictureFile.createNewFile();
             }
-            FileOutputStream fos = new FileOutputStream(pictureFile); //TODO: failing here
+            FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
             MediaStore.Images.Media.insertImage(this.getContentResolver(), pictureFile.getAbsolutePath(), pictureFile.getName(), pictureFile.getName());
-            Toast.makeText(this.getApplicationContext(), "saved.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getApplicationContext(), "Saved", Toast.LENGTH_LONG).show();
         } catch (FileNotFoundException e)
         {
             Log.d(TAG, "File not found: " + e.getMessage());
@@ -161,18 +139,11 @@ public class MainActivity3 extends ActionBarActivity
                 + getApplicationContext().getPackageName()
                 + "/Files/"); //need to do to this, as writing to the root is not allowed. root is read only
 
-
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists())
         {
-/*            if (! mediaStorageDir.mkdirs()) //attempt to create directory TODO: this is returning false
-            {
-                return null;
-            }*/
-            //file.isDirectory() tells if the directory is made, I was going about this a bad way
             mediaStorageDir.mkdirs();
         }
-
         File mediaFile;
         String mImageName = getCurrentTimeStamp() +".PNG";
         mediaFile = new File(mediaStorageDir.getPath() + mImageName);
@@ -199,7 +170,7 @@ public class MainActivity3 extends ActionBarActivity
 
     public static int getFakeOrderNumber()
     {
-        //Normally I should be passing in an orderNumber from the list view before this screen, since that hasn't been created
+        //Normally I should be passing in an Order/Shipment number from the list view before this screen, since that hasn't been created
         //yet this will be the placeholder
         int orderNumber;
         orderNumber = 415323;
