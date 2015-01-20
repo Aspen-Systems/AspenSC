@@ -7,12 +7,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
+import android.graphics.RectF;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SignatureView extends View
@@ -25,9 +28,22 @@ public class SignatureView extends View
     private Canvas mCanvas;
 
     private float curX, curY;
+    //needed for bezier
+    private float mLastVelocity;
+    private float mLastWidth;
+    private boolean mUseBezier = true;
+    private float mLastTouchX;
+    private float mLastTouchY;
+    private float mMaxWidth = 9.0f; //maximum width of stroke (ALSO THE DOT WHEN YOU FIRST PRESS DOWN)
+    private float mMinWidth = 3.0f; //minimum width of stroke
+    private List<TimedPoint> mPoints;
+    private float mVelocityFilterWeight = 0.3f; //Weight used to modify new velocity based on the previous velocity
 
     private static final int TOUCH_TOLERANCE = 4;
     private static final int STROKE_WIDTH = 4;
+
+
+    private RectF mDirtyRect;
 
     public SignatureView(Context context)
     {
@@ -51,7 +67,16 @@ public class SignatureView extends View
         mPaint.setColor(Color.BLACK);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(STROKE_WIDTH);
+        //added to make writing seem more natural
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
+
+        //Dirty rectangle to update only the changed portion of the view
+        mDirtyRect = new RectF();
+
+        clearSignature();
     }
+
     public void setSigColor(int color)
     {
         mPaint.setColor(color);
@@ -62,6 +87,12 @@ public class SignatureView extends View
     }
     public boolean clearSignature()
     {
+        //for bezier
+        mPoints = new ArrayList<TimedPoint>();
+        mLastVelocity = 0;
+        mLastWidth = (mMaxWidth + mMinWidth) / 2;
+
+
         if (mBitmap != null)
             createFakeMotionEvents();
         if (mCanvas != null)
@@ -138,18 +169,114 @@ public class SignatureView extends View
         switch (event.getAction())
         {
             case MotionEvent.ACTION_DOWN:
+                mPoints.clear();
                 touchDown(x, y);
+                mLastTouchX = x;
+                mLastTouchY = y;
+                addPoint(new TimedPoint(x, y));
                 break;
             case MotionEvent.ACTION_MOVE:
+                resetDirtyRect(x, y);
                 touchMove(x, y);
+                addPoint(new TimedPoint(x, y));
                 break;
             case MotionEvent.ACTION_UP:
+                resetDirtyRect(x, y);
+                addPoint(new TimedPoint(x, y));
                 touchUp();
                 break;
         }
-        invalidate();
+
+        if(mUseBezier == false)
+        {
+            invalidate();
+        }
+        else
+        {
+            invalidate(
+                    (int) (mDirtyRect.left - mMaxWidth),
+                    (int) (mDirtyRect.top - mMaxWidth),
+                    (int) (mDirtyRect.right + mMaxWidth),
+                    (int) (mDirtyRect.bottom + mMaxWidth));
+        }
         return true;
     }
+
+    public float strokeWidth(float velocity)
+    {
+        return Math.max(mMaxWidth / (velocity + 1), mMinWidth);
+
+    }
+
+    public void addPoint(TimedPoint tp)
+    {
+        mPoints.add(tp);
+        if (mPoints.size() > 2)
+        {
+            if (mPoints.size() == 3)
+            {
+                mPoints.add(0, mPoints.get(0));
+
+                ControlTimedPoints tmp = calculateCurveControlPoints(mPoints.get(0), mPoints.get(1), mPoints.get(2));
+                TimedPoint c2 = tmp.c2;
+                tmp = calculateCurveControlPoints(mPoints.get(1), mPoints.get(2), mPoints.get(3));
+                TimedPoint c3 = tmp.c1;
+                Bezier curve = new Bezier(mPoints.get(1), c2, c3, mPoints.get(2));
+
+                TimedPoint startPoint = curve.startPoint;
+                TimedPoint endPoint = curve.endPoint;
+
+                float velocity = endPoint.velocityFrom(startPoint);
+                //isNaN just checks to see if its a number, if its not set it to 0, if it is use it
+                velocity = Float.isNaN(velocity) ? 0.0f : velocity;
+
+                velocity = mVelocityFilterWeight * velocity + (1 - mVelocityFilterWeight) * mLastVelocity;
+
+                // The new width is a function of the velocity. Higher velocities
+                // correspond to thinner strokes.
+                float newWidth = strokeWidth(velocity);
+
+                // The Bezier's width starts out as last curve's final width, and
+                // gradually changes to the stroke width just calculated. The new
+                // width calculation is based on the velocity between the Bezier's
+                // start and end mPoints.
+                addBezier(curve, mLastWidth, newWidth);
+
+                mLastVelocity = velocity;
+                mLastWidth = newWidth;
+
+                // Remove the first element from the list,
+                // so that we always have no more than 4 mPoints in mPoints array.
+                mPoints.remove(0);
+            }
+        }
+
+    }
+
+        public ControlTimedPoints calculateCurveControlPoints(TimedPoint s1, TimedPoint s2 ,TimedPoint s3)
+        {
+            float dx1 = s1.x - s2.x;
+            float dy1 = s1.y - s2.y;
+            float dx2 = s2.x - s3.x;
+            float dy2 = s2.y - s3.y;
+
+            TimedPoint m1 = new TimedPoint((s1.x + s2.x) / 2.0f, (s1.y + s2.y) / 2.0f);
+            TimedPoint m2 = new TimedPoint((s2.x + s3.x) / 2.0f, (s2.y + s3.y) / 2.0f);
+
+            float l1 = (float) Math.sqrt(dx1*dx1 + dy1*dy1);
+            float l2 = (float) Math.sqrt(dx2*dx2 + dy2*dy2);
+
+            float dxm = (m1.x - m2.x);
+            float dym = (m1.y - m2.y);
+            float k = l2 / (l1 + l2);
+            TimedPoint cm = new TimedPoint(m2.x + dxm*k, m2.y + dym*k);
+
+            float tx = s2.x - cm.x;
+            float ty = s2.y - cm.y;
+
+            return new ControlTimedPoints(new TimedPoint(m1.x + tx, m1.y + ty), new TimedPoint(m2.x + tx, m2.y + ty));
+         }
+
     /**----------------------------------------------------------
      * Private methods
      **---------------------------------------------------------*/
@@ -186,8 +313,16 @@ public class SignatureView extends View
         mPath.reset();
     }
 
-/*    private void addBezier(Bezier curve, float startWidth, float endWidth) {
-        ensureSignatureBitmap();
+    private void createFakeMotionEvents()
+    {
+        MotionEvent downEvent = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+100, MotionEvent.ACTION_DOWN, 1f, 1f ,0);
+        MotionEvent upEvent = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+100, MotionEvent.ACTION_UP, 1f, 1f ,0);
+        onTouchEvent(downEvent);
+        onTouchEvent(upEvent);
+    }
+
+    private void addBezier(Bezier curve, float startWidth, float endWidth) {
+        //ensureSignatureBitmap();
         float originalWidth = mPaint.getStrokeWidth();
         float widthDelta = endWidth - startWidth;
         float drawSteps = (float) Math.floor(curve.length());
@@ -213,19 +348,43 @@ public class SignatureView extends View
 
             // Set the incremental stroke width and draw.
             mPaint.setStrokeWidth(startWidth + ttt * widthDelta);
-            mSignatureBitmapCanvas.drawPoint(x, y, mPaint);
-            expandDirtyRect(x, y);
+            mCanvas.drawPoint(x, y, mPaint);
+            //expandDirtyRect(x, y);
         }
 
         mPaint.setStrokeWidth(originalWidth);
-    }*/
-    private void createFakeMotionEvents()
-    {
-        MotionEvent downEvent = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+100, MotionEvent.ACTION_DOWN, 1f, 1f ,0);
-        MotionEvent upEvent = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+100, MotionEvent.ACTION_UP, 1f, 1f ,0);
-        onTouchEvent(downEvent);
-        onTouchEvent(upEvent);
     }
+
+    /**
+     * Called when replaying history to ensure the dirty region includes all
+     * mPoints.
+     */
+    private void expandDirtyRect(float historicalX, float historicalY) {
+        if (historicalX < mDirtyRect.left) {
+            mDirtyRect.left = historicalX;
+        } else if (historicalX > mDirtyRect.right) {
+            mDirtyRect.right = historicalX;
+        }
+        if (historicalY < mDirtyRect.top) {
+            mDirtyRect.top = historicalY;
+        } else if (historicalY > mDirtyRect.bottom) {
+            mDirtyRect.bottom = historicalY;
+        }
+    }
+
+    /**
+     * Resets the dirty region when the motion event occurs.
+     */
+    private void resetDirtyRect(float eventX, float eventY) {
+
+        // The mLastTouchX and mLastTouchY were set when the ACTION_DOWN
+        // motion event occurred.
+        mDirtyRect.left = Math.min(mLastTouchX, eventX);
+        mDirtyRect.right = Math.max(mLastTouchX, eventX);
+        mDirtyRect.top = Math.min(mLastTouchY, eventY);
+        mDirtyRect.bottom = Math.max(mLastTouchY, eventY);
+    }
+
 
 
 

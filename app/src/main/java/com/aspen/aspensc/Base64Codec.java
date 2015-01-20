@@ -19,6 +19,9 @@ import java.nio.channels.FileChannel;
 // get byte [] convert that byte [] to bitmap by which you will get original image.
 //http://stackoverflow.com/questions/9357668/how-to-store-image-in-sqlite-database
 
+//UPDATE: this class is now a standard part of Java
+//http://developer.android.com/reference/android/util/Base64.html
+
 public class Base64Codec {
     private int IO_BUFFER_SIZE = 64;
     //private int IO_BUFFER_SIZE = 8192;
