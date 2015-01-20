@@ -24,6 +24,7 @@ public class SignatureView extends View
     private Paint mPaint; //color of signature
     private Paint bgPaint = new Paint(Color.TRANSPARENT); //color of background
 
+
     private Bitmap mBitmap;
     private Canvas mCanvas;
 
@@ -250,9 +251,7 @@ public class SignatureView extends View
                 mPoints.remove(0);
             }
         }
-
     }
-
         public ControlTimedPoints calculateCurveControlPoints(TimedPoint s1, TimedPoint s2 ,TimedPoint s3)
         {
             float dx1 = s1.x - s2.x;
