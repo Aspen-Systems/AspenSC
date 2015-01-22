@@ -2,6 +2,7 @@ package com.aspen.aspensc;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.content.Context;
 
 /**
  * Created by rfrench on 1/21/2015.
@@ -9,9 +10,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class AspenSQLiteHelper extends SQLiteOpenHelper
 {
 
-    public MySQLiteHelper(Context context)
+    private static final String DBName= "Canopy";
+    private static final int DBVer= 1;
+
+    public AspenSQLiteHelper(Context context)
     {
-        super(context, "Canopy", null, 1);
+        super(context, DBName, null, DBVer);
     }
 
     @Override
