@@ -13,7 +13,7 @@ public class Routes extends SQLiteOpenHelper
     private static final String DBName= "Routes";
     private static final int DBVer= 1;
 
-    public AspenSQLite(Context context)
+    public Routes(Context context)
     {
         super(context, DBName, null, DBVer);
     }
