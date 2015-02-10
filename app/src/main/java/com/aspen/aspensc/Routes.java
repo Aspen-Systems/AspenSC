@@ -12,6 +12,11 @@ public class Routes extends SQLiteOpenHelper
 
     private static final String DBName= "Routes";
     private static final int DBVer= 1;
+    private static final String TableName = "OE_CodeRoutes";
+
+    // Database creation sql statement
+    private static final String DATABASE_CREATE = "";
+
 
     public Routes(Context context)
     {
