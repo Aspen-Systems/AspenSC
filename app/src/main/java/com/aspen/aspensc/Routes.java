@@ -48,7 +48,7 @@ public class Routes extends SQLiteOpenHelper
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-        db.execSQL();
+        //db.execSQL();
     }
 
     @Override
