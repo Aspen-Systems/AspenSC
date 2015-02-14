@@ -13,7 +13,12 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import java.io.ByteArrayOutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -374,7 +379,8 @@ public class SignatureView extends View
     /**
      * Resets the dirty region when the motion event occurs.
      */
-    private void resetDirtyRect(float eventX, float eventY) {
+    private void resetDirtyRect(float eventX, float eventY)
+    {
 
         // The mLastX and mLastY were set when the ACTION_DOWN
         // motion event occurred.
@@ -384,6 +390,23 @@ public class SignatureView extends View
         mDirtyRect.bottom = Math.max(mLastY, eventY);
     }
 
+    private void UploadSignature()
+    {
+
+/*        ByteArrayBody bab = new ByteArrayBody(sendData,
+                "mobile.png");
+        MultipartEntity entity = new MultipartEntity(
+                HttpMultipartMode.BROWSER_COMPATIBLE);
+        entity.addPart("mobile", bab);
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpPost httpPost = new HttpPost(URL + "/"
+                + METHODNAME_UPLOAD);
+        httpPost.setHeader("Content-Type", "application/json");
+        HttpResponse response = httpClient.execute(httpPost);
+        System.out.println(response.getStatusLine().getStatusCode());*/
+
+
+    }
 
 
 

@@ -30,15 +30,12 @@ public class Shipments extends SQLiteOpenHelper
             "\t`TotalWeight`\tNUMERIC NOT NULL,\n" +
             "\t`TotalCases`\tINTEGER,\n" +
             "\t`WarehouseCode`\tINTEGER,\n" +
+            "\t`Signature`\tBLOB,\n" +
             "\tPRIMARY KEY(BillOfLadingNumber)\n" +
             ");";
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + mTableName;
-
-
-    // Database creation sql statement
-    private static final String DATABASE_CREATE = "";
 
 
     public Shipments(Context context)
@@ -49,13 +46,13 @@ public class Shipments extends SQLiteOpenHelper
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-        //db.execSQL();
+        db.execSQL(SQL_CREATE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
-
+        db.execSQL(SQL_DELETE_ENTRIES);
     }
 
 
