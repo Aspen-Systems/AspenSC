@@ -10,15 +10,22 @@ import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Base64;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.net.URL;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -392,22 +399,80 @@ public class SignatureView extends View
 
     private void UploadSignature()
     {
-
-/*        ByteArrayBody bab = new ByteArrayBody(sendData,
-                "mobile.png");
-        MultipartEntity entity = new MultipartEntity(
-                HttpMultipartMode.BROWSER_COMPATIBLE);
-        entity.addPart("mobile", bab);
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost(URL + "/"
-                + METHODNAME_UPLOAD);
-        httpPost.setHeader("Content-Type", "application/json");
-        HttpResponse response = httpClient.execute(httpPost);
-        System.out.println(response.getStatusLine().getStatusCode());*/
+        //ByteArrayOutputStream bos = new ByteArrayOutputStream();
+       //mBitmap.compress(Bitmap.CompressFormat.JPEG, 75, bos);
+        //byte[] data = bos.toByteArray();
+        //byte[] sendData;
+        String sendData;
+        sendData = getEncoded64ImageStringFromBitmap(mBitmap);
 
 
+
+        // Making HTTP request
+        try {
+            // defaultHttpClient
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+
+            String URL1 = "http://rohit-pc:8078/service1.svc/UploadImage";
+
+            HttpPost httpPost = new HttpPost(URL1);
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json" );
+
+            ContentBody bin = null;
+            //deprecated
+//            MultipartEntity reqEntity = new MultipartEntity(
+//                    HttpMultipartMode.BROWSER_COMPATIBLE);
+
+            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+            entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            //entityBuilder.addBinaryBody("image", sendData);
+            entityBuilder.addTextBody("imageFileName", sendData);
+
+
+            //ByteArrayBody bab = new ByteArrayBody(data, "forest.jpg");
+
+//            reqEntity.addPart("image", bab);
+//            reqEntity.addPart("photoCaption", new StringBody("sfsdfsdf"));
+//
+//            httpPost.setEntity(reqEntity);
+
+            HttpEntity entity = entityBuilder.build();
+            httpPost.setEntity(entity);
+
+            HttpResponse response = httpClient.execute(httpPost);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    response.getEntity().getContent(), "UTF-8"));
+            String sResponse;
+            StringBuilder s = new StringBuilder();
+
+            while ((sResponse = reader.readLine()) != null)
+            {
+                s = s.append(sResponse);
+            }
+            System.out.println("Response: " + s);
+        } catch (Exception e)
+        {
+            Log.e(e.getClass().getName(), e.getMessage());
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public static String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 70, stream);
+        byte[] byteFormat = stream.toByteArray();
+        // get the base 64 string
+        String imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
+
+        //return imgString.getBytes();
+        return imgString;
     }
 
 
 
 }
+
