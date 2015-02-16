@@ -397,69 +397,7 @@ public class SignatureView extends View
         mDirtyRect.bottom = Math.max(mLastY, eventY);
     }
 
-    private void UploadSignature()
-    {
-        //ByteArrayOutputStream bos = new ByteArrayOutputStream();
-       //mBitmap.compress(Bitmap.CompressFormat.JPEG, 75, bos);
-        //byte[] data = bos.toByteArray();
-        //byte[] sendData;
-        String sendData;
-        sendData = getEncoded64ImageStringFromBitmap(mBitmap);
 
-
-
-        // Making HTTP request
-        try {
-
-            DefaultHttpClient httpClient = new DefaultHttpClient();
-            //change
-            String URL1 = "http://rohit-pc:8078/service1.svc/UploadImage";
-
-            HttpPost httpPost = new HttpPost(URL1);
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json" );
-
-            ContentBody bin = null;
-
-            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-            entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-            entityBuilder.addTextBody("imageFileName", sendData);
-
-
-            HttpEntity entity = entityBuilder.build();
-            httpPost.setEntity(entity);
-
-            HttpResponse response = httpClient.execute(httpPost);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    response.getEntity().getContent(), "UTF-8"));
-            String sResponse;
-            StringBuilder s = new StringBuilder();
-
-            while ((sResponse = reader.readLine()) != null)
-            {
-                s = s.append(sResponse);
-            }
-            System.out.println("Response: " + s);
-        } catch (Exception e)
-        {
-            Log.e(e.getClass().getName(), e.getMessage());
-            e.printStackTrace();
-        }
-
-
-    }
-
-    public static String getEncoded64ImageStringFromBitmap(Bitmap bitmap) {
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 70, stream);
-        byte[] byteFormat = stream.toByteArray();
-        // get the base 64 string
-        String imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
-
-        //return imgString.getBytes();
-        return imgString;
-    }
 
 
 
