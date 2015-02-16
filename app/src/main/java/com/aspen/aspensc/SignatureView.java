@@ -410,9 +410,9 @@ public class SignatureView extends View
 
         // Making HTTP request
         try {
-            // defaultHttpClient
-            DefaultHttpClient httpClient = new DefaultHttpClient();
 
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            //change
             String URL1 = "http://rohit-pc:8078/service1.svc/UploadImage";
 
             HttpPost httpPost = new HttpPost(URL1);
@@ -420,22 +420,11 @@ public class SignatureView extends View
             httpPost.setHeader("Content-type", "application/json" );
 
             ContentBody bin = null;
-            //deprecated
-//            MultipartEntity reqEntity = new MultipartEntity(
-//                    HttpMultipartMode.BROWSER_COMPATIBLE);
 
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
             entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-            //entityBuilder.addBinaryBody("image", sendData);
             entityBuilder.addTextBody("imageFileName", sendData);
 
-
-            //ByteArrayBody bab = new ByteArrayBody(data, "forest.jpg");
-
-//            reqEntity.addPart("image", bab);
-//            reqEntity.addPart("photoCaption", new StringBody("sfsdfsdf"));
-//
-//            httpPost.setEntity(reqEntity);
 
             HttpEntity entity = entityBuilder.build();
             httpPost.setEntity(entity);
