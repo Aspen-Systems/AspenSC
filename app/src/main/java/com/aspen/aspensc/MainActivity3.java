@@ -1,13 +1,14 @@
 package com.aspen.aspensc;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,24 +16,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.lang.String;
 
 
 
@@ -87,7 +76,9 @@ public class MainActivity3 extends ActionBarActivity
                 Log.d(TAG, "Save"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
 
                saveSig(sig);
-               UploadSignature(sig);
+               Bitmap[] signatures = {sig};
+               new UploadImage().execute(signatures);
+
 
             }
         });
@@ -182,7 +173,8 @@ public class MainActivity3 extends ActionBarActivity
             finalString = finalString.replace("-", "");
             return finalString;
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             e.printStackTrace();
 
             return null;
@@ -203,70 +195,34 @@ public class MainActivity3 extends ActionBarActivity
         sv.clearSignature();
     }
 
-    public void UploadSignature(Bitmap sig)
+
+    private class UploadImage extends AsyncTask<Bitmap, Void, Void>
     {
-        //ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        //mBitmap.compress(Bitmap.CompressFormat.JPEG, 75, bos);
-        //byte[] data = bos.toByteArray();
-        byte[] sendData;
-        //String sendData;
-        sendData = getEncoded64ImageStringFromBitmap(sig);
+        private final ProgressDialog dialog = new ProgressDialog(MainActivity3.this);
+        private NetworkAccessService oNAS = new NetworkAccessService();
 
-
-        // Making HTTP request
-        try {
-
-            DefaultHttpClient httpClient = new DefaultHttpClient();
-            //change
-            String URL1 = "http://localhost:65007/CanopyWebService.svc/SubmitInvoiceSignature";
-
-            HttpPost httpPost = new HttpPost(URL1);
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json" );
-
-            ContentBody bin = null;
-
-            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-            entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-            entityBuilder.addBinaryBody("imageFileName", sendData); //error here I think I am missing httpMimeCore.jar or something like that, Not sure why it waits until this method to crash
-
-
-            HttpEntity entity = entityBuilder.build();
-            httpPost.setEntity(entity);
-
-            HttpResponse response = httpClient.execute(httpPost);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    response.getEntity().getContent(), "UTF-8"));
-            String sResponse;
-            StringBuilder s = new StringBuilder();
-
-            while ((sResponse = reader.readLine()) != null)
-            {
-                s = s.append(sResponse);
-            }
-            System.out.println("Response: " + s);
-        } catch (Exception e)
+        @Override
+        protected void onPreExecute()
         {
-            Log.e(e.getClass().getName(), e.getMessage());
-            e.printStackTrace();
+            this.dialog.setMessage("Loading...");
+            this.dialog.setCancelable(false);
+            this.dialog.show();
         }
 
+        @Override
+        protected Void doInBackground(Bitmap... params)
+        {
+            Bitmap sig = params[0];
+            oNAS.UploadSignature(sig);
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result)
+        {
+            this.dialog.dismiss();
+        }
 
     }
-
-    public static byte[] getEncoded64ImageStringFromBitmap(Bitmap bitmap)
-    {
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 70, stream);
-        byte[] byteFormat = stream.toByteArray();
-        // get the base 64 string
-        String imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
-
-        return imgString.getBytes();
-        //return imgString;
-    }
-
 
 
 
