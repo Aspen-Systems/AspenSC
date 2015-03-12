@@ -3,11 +3,14 @@ package com.aspen.aspensc;
 import android.graphics.Bitmap;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONStringer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -24,6 +27,9 @@ public class NetworkAccessService
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sig.compress(Bitmap.CompressFormat.PNG, 100, bos);
         byte[] imageData = bos.toByteArray();
+        String encodedImage;
+        String postMsg;
+        String err;
 
         // Making HTTP request
         try {
@@ -37,20 +43,43 @@ public class NetworkAccessService
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json" );
 
+            encodedImage = Base64.encodeToString(imageData, Base64.DEFAULT);
+            postMsg  = "";
+            err = "";
+            try {
+                JSONStringer jsonObj = new JSONStringer()
+                        .object()
+                        .key("image")
+                        .value("test")
+                        .endObject();
 
-            httpPost.setEntity(new ByteArrayEntity(imageData));
+                postMsg = jsonObj.toString();
 
-            HttpResponse response = httpClient.execute(httpPost);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    response.getEntity().getContent(), "UTF-8"));
-            String sResponse;
-            StringBuilder s = new StringBuilder();
+                //httpPost.setEntity(new ByteArrayEntity(imageData));
+                httpPost.setEntity(new StringEntity(postMsg));
 
-            while ((sResponse = reader.readLine()) != null)
+                HttpResponse response = httpClient.execute(httpPost);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        response.getEntity().getContent(), "UTF-8"));
+                String sResponse;
+                StringBuilder s = new StringBuilder();
+
+                while ((sResponse = reader.readLine()) != null)
+                {
+                    s = s.append(sResponse);
+                }
+                System.out.println("Response: " + s);
+
+
+            } catch (JSONException ex)
             {
-                s = s.append(sResponse);
+                //This catch is here to see if I run into any file size limits on the base64 string.
+                // Research shows that going above a certain size causes problems specifically with
+                // an escape character making its way into the string
+                err = ex.getClass().getSimpleName() + ": " + "Failed to create JSON object";
+                Log.d("NAS", err);
+
             }
-            System.out.println("Response: " + s);
         } catch (Exception e)
         {
             Log.e(e.getClass().getName(), e.getMessage());
