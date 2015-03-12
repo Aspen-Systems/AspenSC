@@ -30,7 +30,8 @@ public class NetworkAccessService
 
             DefaultHttpClient httpClient = new DefaultHttpClient();
             //change
-            String URL1 = "http://10.0.2.2:1978/RestService.svc/uploadImage/";
+            //String URL1 = "http://10.0.2.2:65007/RestService.svc/uploadImage/";
+            String URL1 = "http://10.0.2.2:8080/CanopyWebService.svc/SubmitInvoiceSignature/"; //TODO make this a variable that is defined in a settings screen
 
             HttpPost httpPost = new HttpPost(URL1);
             httpPost.setHeader("Accept", "application/json");
