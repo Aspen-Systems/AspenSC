@@ -50,7 +50,7 @@ public class NetworkAccessService
                 JSONStringer jsonObj = new JSONStringer()
                         .object()
                         .key("image")
-                        .value("test")
+                        .value(encodedImage)
                         .endObject();
 
                 postMsg = jsonObj.toString();
