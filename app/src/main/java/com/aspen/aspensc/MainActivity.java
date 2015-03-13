@@ -1,12 +1,16 @@
 package com.aspen.aspensc;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 
 public class MainActivity extends ActionBarActivity
@@ -51,5 +55,49 @@ public class MainActivity extends ActionBarActivity
         Intent intent = new Intent(this, MainActivity3.class);
         Button btnGoTo = (Button) findViewById(R.id.btnGoTo);
         startActivity(intent);
+    }
+
+
+    public void zzz(View view)
+    {
+        String response;
+        String[] input = new String[1];
+
+        EditText txtInput = (EditText)findViewById(R.id.txtEnterID);
+        input[0] = txtInput.getText().toString();
+        new GetExample().execute(input);
+        TextView txtOutput =  (TextView)findViewById(R.id.txtresult);
+        txtOutput.setText(response);
+    }
+
+
+    private class GetExample extends AsyncTask<Integer, Void, String>
+    {
+        private final ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+        private NetworkAccessService oNAS = new NetworkAccessService();
+        private String mResult = "";
+
+        @Override
+        protected void onPreExecute()
+        {
+            this.dialog.setMessage("Loading...");
+            this.dialog.setCancelable(false);
+            this.dialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(int... params)
+        {
+            String str = params[0] + "";
+            mResult += oNAS.Test(str);
+            return null;
+        }
+        @Override
+        protected String onPostExecute(Void result)
+        {
+            this.dialog.dismiss();
+            return mResult;
+        }
+
     }
 }

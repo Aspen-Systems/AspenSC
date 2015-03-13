@@ -3,9 +3,10 @@ package com.aspen.aspensc;
 import android.graphics.Bitmap;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -14,7 +15,9 @@ import org.json.JSONStringer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
 
 /**
  * Created by French on 2/16/2015.
@@ -37,7 +40,7 @@ public class NetworkAccessService
             DefaultHttpClient httpClient = new DefaultHttpClient();
             //change
             //String URL1 = "http://10.0.2.2:65007/RestService.svc/uploadImage/";
-            String URL1 = "http://10.0.2.2:8080/CanopyWebService.svc/SubmitInvoiceSignature/"; //TODO make this a variable that is defined in a settings screen
+            String URL1 = "http://10.0.2.2:8080/CanopyWebService.svc/SubmitInvoiceSignature"; //TODO make this a variable that is defined in a settings screen
 
             HttpPost httpPost = new HttpPost(URL1);
             httpPost.setHeader("Accept", "application/json");
@@ -85,6 +88,70 @@ public class NetworkAccessService
             Log.e(e.getClass().getName(), e.getMessage());
             e.printStackTrace();
         }
+    }
+
+
+    public String Test(String id)
+    {
+        String result;
+        result = "bad request";
+        // Making HTTP request
+        try {
+
+            DefaultHttpClient httpClient = new DefaultHttpClient();
+            //change
+            //String URL1 = "http://10.0.2.2:65007/RestService.svc/uploadImage/";
+            String URL1 = "http://10.0.2.2:8080/CanopyWebService.svc/GetResult/" + id; //TODO make this a variable that is defined in a settings screen
+
+            HttpGet httpget = new HttpGet(URL1);
+
+            HttpResponse response = httpClient.execute(httpget);
+            HttpEntity entity = response.getEntity();
+            if (entity != null)
+            {
+
+                // A Simple JSON Response Read
+                InputStream instream = entity.getContent();
+                result = convertStreamToString(instream);
+                // now you have the string representation of the HTML request
+                instream.close();
+
+            }
+
+        } catch (Exception e)
+        {
+            Log.e(e.getClass().getName(), e.getMessage());
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    private static String convertStreamToString(InputStream is) {
+    /*
+     * To convert the InputStream to String we use the BufferedReader.readLine()
+     * method. We iterate until the BufferedReader return null which means
+     * there's no more data to read. Each line will appended to a StringBuilder
+     * and returned as String.
+     */
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+
+        String line = null;
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
     }
 
     public static byte[] getEncoded64ImageStringFromBitmap(Bitmap bitmap)

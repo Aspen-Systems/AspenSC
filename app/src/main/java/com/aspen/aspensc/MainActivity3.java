@@ -72,8 +72,8 @@ public class MainActivity3 extends ActionBarActivity
         {
             public void onClick(View v)
             {
-                Bitmap sig = sv.getImage(R.id.signatureView);
-                Log.d(TAG, "Save"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
+               Bitmap sig = sv.getImage(R.id.signatureView);
+               Log.d(TAG, "Save"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
 
                saveSig(sig);
                Bitmap[] signatures = {sig};

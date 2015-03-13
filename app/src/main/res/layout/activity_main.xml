@@ -18,4 +18,36 @@
         android:layout_marginStart="51dp"
         android:layout_marginTop="71dp"
         android:onClick="GoToSigCap" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GetResult"
+        android:id="@+id/btnGetResult"
+        android:layout_below="@+id/btnGoTo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="137dp"
+        android:onClick="zzz" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/txtresult"
+        android:layout_below="@+id/btnGetResult"
+        android:layout_marginTop="42dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/txtEnterID"
+        android:layout_marginTop="68dp"
+        android:layout_below="@+id/btnGoTo"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>
