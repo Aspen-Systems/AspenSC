@@ -94,8 +94,9 @@ public class NetworkAccessService
     public String Test(String id)
     {
         String result;
-        result = "bad request";
+        result = "bad request id: " + id;
         // Making HTTP request
+
         try {
 
             DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -111,10 +112,10 @@ public class NetworkAccessService
             {
 
                 // A Simple JSON Response Read
-                InputStream instream = entity.getContent();
-                result = convertStreamToString(instream);
+                InputStream aa = entity.getContent();
+                result = convertStreamToString(aa);
                 // now you have the string representation of the HTML request
-                instream.close();
+                aa.close();
 
             }
 

@@ -15,7 +15,11 @@ import android.widget.TextView;
 
 public class MainActivity extends ActionBarActivity
 {
-    //todo test
+
+    private String[] mResponse;
+    private EditText txtInput;
+    TextView txtOutput;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -60,22 +64,21 @@ public class MainActivity extends ActionBarActivity
 
     public void zzz(View view)
     {
-        String response;
+
         String[] input = new String[1];
 
-        EditText txtInput = (EditText)findViewById(R.id.txtEnterID);
+
+
+        txtInput = (EditText)findViewById(R.id.txtEnterID);
         input[0] = txtInput.getText().toString();
         new GetExample().execute(input);
-        TextView txtOutput =  (TextView)findViewById(R.id.txtresult);
-        txtOutput.setText(response);
     }
 
 
-    private class GetExample extends AsyncTask<Integer, Void, String>
+    private class GetExample extends AsyncTask<String[], Void, String[]>
     {
-        private final ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+        private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
         private NetworkAccessService oNAS = new NetworkAccessService();
-        private String mResult = "";
 
         @Override
         protected void onPreExecute()
@@ -86,17 +89,20 @@ public class MainActivity extends ActionBarActivity
         }
 
         @Override
-        protected Void doInBackground(int... params)
+        protected String[] doInBackground(String[]... params)
         {
-            String str = params[0] + "";
-            mResult += oNAS.Test(str);
-            return null;
+            String[] result = new String[10];
+            String str = params[0].toString();
+            result[0] = oNAS.Test(str);
+            return result;
         }
         @Override
-        protected String onPostExecute(Void result)
+        protected void onPostExecute(String[] result)
         {
             this.dialog.dismiss();
-            return mResult;
+            txtOutput =  (TextView)findViewById(R.id.txtresult);
+            txtOutput.setText(result[0]);
+
         }
 
     }
