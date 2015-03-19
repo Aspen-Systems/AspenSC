@@ -45,8 +45,8 @@ public class NetworkAccessService
 
 
             HttpPost httpPost = new HttpPost(URL1);
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json" );
+            httpPost.setHeader("Accept", "application/json"); //This is what the android app is expecting back, in this case json
+            httpPost.setHeader("Content-type", "application/json" ); //this is what the we are sending to the server so it knows what to parse
 
             encodedImage = Base64.encodeToString(imageData, Base64.DEFAULT);
             postMsg  = "";
@@ -63,8 +63,11 @@ public class NetworkAccessService
                 postMsg = jsonObj.toString();
 
                 //httpPost.setEntity(new ByteArrayEntity(imageData));
-                StringEntity OutGoingJSON = new StringEntity(postMsg);
+                StringEntity OutGoingJSON = new StringEntity(postMsg, "UTF-8");
                 OutGoingJSON.setContentType("application/json");
+
+
+                //TODO try this  httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 httpPost.setEntity(OutGoingJSON);
 
                 HttpResponse response = httpClient.execute(httpPost);
