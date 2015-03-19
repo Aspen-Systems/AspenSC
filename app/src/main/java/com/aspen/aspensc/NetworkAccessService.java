@@ -63,7 +63,7 @@ public class NetworkAccessService
                 postMsg = jsonObj.toString();
 
                 //httpPost.setEntity(new ByteArrayEntity(imageData));
-                StringEntity OutGoingJSON = new StringEntity(postMsg, "UTF-8");
+                StringEntity OutGoingJSON = new StringEntity("{\"image\":\"aaaaaaa\"}", "UTF-8"); //TODO replace AAAA with postMsg
                 OutGoingJSON.setContentType("application/json");
 
 
