@@ -15,9 +15,9 @@ import org.json.JSONStringer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
 
 /**
  * Created by French on 2/16/2015.
@@ -42,6 +42,8 @@ public class NetworkAccessService
             //String URL1 = "http://10.0.2.2:65007/RestService.svc/uploadImage/";
             String URL1 = "http://10.0.2.2:8080/CanopyWebService.svc/SubmitInvoiceSignature"; //TODO make this a variable that is defined in a settings screen
 
+
+
             HttpPost httpPost = new HttpPost(URL1);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json" );
@@ -56,10 +58,14 @@ public class NetworkAccessService
                         .value(encodedImage)
                         .endObject();
 
+                Log.i("json", jsonObj.toString());
+
                 postMsg = jsonObj.toString();
 
                 //httpPost.setEntity(new ByteArrayEntity(imageData));
-                httpPost.setEntity(new StringEntity(postMsg));
+                StringEntity OutGoingJSON = new StringEntity(postMsg);
+                OutGoingJSON.setContentType("application/json");
+                httpPost.setEntity(OutGoingJSON);
 
                 HttpResponse response = httpClient.execute(httpPost);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -71,8 +77,8 @@ public class NetworkAccessService
                 {
                     s = s.append(sResponse);
                 }
-                System.out.println("Response: " + s);
-
+                //System.out.println("Response: " + s);
+                Log.i("Response:", s.toString());
 
             } catch (JSONException ex)
             {

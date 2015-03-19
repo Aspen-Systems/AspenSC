@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
 
 public class MainActivity extends ActionBarActivity
 {
@@ -75,7 +77,7 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    private class GetExample extends AsyncTask<String[], Void, String[]>
+    private class GetExample extends AsyncTask<String, Void, String[]>
     {
         private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
         private NetworkAccessService oNAS = new NetworkAccessService();
@@ -89,9 +91,10 @@ public class MainActivity extends ActionBarActivity
         }
 
         @Override
-        protected String[] doInBackground(String[]... params)
+        protected String[] doInBackground(String... params)
         {
             String[] result = new String[10];
+
             String str = params[0].toString();
             result[0] = oNAS.Test(str);
             return result;
