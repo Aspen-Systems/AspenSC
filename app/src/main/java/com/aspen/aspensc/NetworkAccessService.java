@@ -8,16 +8,19 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONStringer;
+import org.apache.http.entity.ByteArrayEntity;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.FileInputStream;
 
 /**
  * Created by French on 2/16/2015.
@@ -45,31 +48,38 @@ public class NetworkAccessService
 
 
             HttpPost httpPost = new HttpPost(URL1);
-            httpPost.setHeader("Accept", "application/json"); //This is what the android app is expecting back, in this case json
-            httpPost.setHeader("Content-type", "application/json" ); //this is what the we are sending to the server so it knows what to parse
+            ByteArrayEntity BAE = new ByteArrayEntity(imageData);
 
-            encodedImage = Base64.encodeToString(imageData, Base64.DEFAULT);
+            BAE.setContentType("binary/octet-stream");
+            BAE.setChunked(true); //send multiple parts if needed
+
+
+            //httpPost.setHeader("Accept", "application/json"); //This is what the android app is expecting back, in this case json
+            //httpPost.setHeader("Content-type", "application/json" ); //this is what the we are sending to the server so it knows what to parse
+
+            //encodedImage = Base64.encodeToString(imageData, Base64.DEFAULT);
             postMsg  = "";
             err = "";
             try {
-                JSONStringer jsonObj = new JSONStringer()
-                        .object()
-                        .key("image")
-                        .value(encodedImage)
-                        .endObject();
-
-                Log.i("json", jsonObj.toString());
-
-                postMsg = jsonObj.toString();
-
-                //httpPost.setEntity(new ByteArrayEntity(imageData));
-                StringEntity OutGoingJSON = new StringEntity("{\"image\":\"aaaaaaa\"}", "UTF-8"); //TODO replace AAAA with postMsg
-                OutGoingJSON.setContentType("application/json");
+//                JSONStringer jsonObj = new JSONStringer()
+//                        .object()
+//                        .key("image")
+//                        .value(encodedImage)
+//                        .endObject();
+//
+//                Log.i("json", jsonObj.toString());
+//
+//                postMsg = jsonObj.toString();
+//
+//                //httpPost.setEntity(new ByteArrayEntity(imageData));
+//                StringEntity OutGoingJSON = new StringEntity("{\"image\":\"aaaaaaa\"}", "UTF-8"); //TODO replace AAAA with postMsg
+//                OutGoingJSON.setContentType("application/json");
 
 
                 //TODO try this  httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-                httpPost.setEntity(OutGoingJSON);
+                //httpPost.setEntity(OutGoingJSON);
 
+                httpPost.setEntity(BAE);
                 HttpResponse response = httpClient.execute(httpPost);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
                         response.getEntity().getContent(), "UTF-8"));
@@ -83,7 +93,7 @@ public class NetworkAccessService
                 //System.out.println("Response: " + s);
                 Log.i("Response:", s.toString());
 
-            } catch (JSONException ex)
+            } catch (Exception ex)
             {
                 //This catch is here to see if I run into any file size limits on the base64 string.
                 // Research shows that going above a certain size causes problems specifically with
