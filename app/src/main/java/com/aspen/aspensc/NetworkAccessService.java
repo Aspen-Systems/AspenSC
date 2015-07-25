@@ -10,10 +10,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONStringer;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -28,7 +31,7 @@ import java.io.FileInputStream;
 public class NetworkAccessService
 {
 
-    public void UploadSignature(Bitmap sig)
+    public void UploadSignature(Bitmap sig, String fileName)
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sig.compress(Bitmap.CompressFormat.PNG, 100, bos);
@@ -48,10 +51,19 @@ public class NetworkAccessService
 
 
             HttpPost httpPost = new HttpPost(URL1);
-            ByteArrayEntity BAE = new ByteArrayEntity(imageData);
+//            ByteArrayEntity BAE = new ByteArrayEntity(imageData);
+//
+//            BAE.setContentType("binary/octet-stream");
+//            BAE.setChunked(true); //send multiple parts if needed
 
-            BAE.setContentType("binary/octet-stream");
-            BAE.setChunked(true); //send multiple parts if needed
+            MultipartEntityBuilder entity = MultipartEntityBuilder.create();
+            entity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            entity.addBinaryBody("image", imageData,ContentType.APPLICATION_OCTET_STREAM, fileName);
+
+
+
+
+
 
 
             //httpPost.setHeader("Accept", "application/json"); //This is what the android app is expecting back, in this case json
@@ -79,7 +91,7 @@ public class NetworkAccessService
                 //TODO try this  httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
                 //httpPost.setEntity(OutGoingJSON);
 
-                httpPost.setEntity(BAE);
+                httpPost.setEntity(entity.build());
                 HttpResponse response = httpClient.execute(httpPost);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
                         response.getEntity().getContent(), "UTF-8"));

@@ -33,6 +33,7 @@ public class MainActivity3 extends ActionBarActivity
     private Button btnCancel;
 
     private Button btnSave;
+    private String mFileName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -77,7 +78,9 @@ public class MainActivity3 extends ActionBarActivity
 
                saveSig(sig);
                Bitmap[] signatures = {sig};
-               new UploadImage().execute(signatures);
+               UploadImage ui = new  UploadImage();
+               ui.setFileName(mFileName);
+               ui.execute(signatures);
 
 
             }
@@ -157,8 +160,8 @@ public class MainActivity3 extends ActionBarActivity
             mediaStorageDir.mkdirs();
         }
         File mediaFile;
-        String mImageName = getCurrentTimeStamp() +".PNG";
-        mediaFile = new File(mediaStorageDir.getPath() + mImageName);
+        mFileName = getCurrentTimeStamp() +".PNG";
+        mediaFile = new File(mediaStorageDir.getPath() + mFileName);
         return mediaFile;
     }
 
@@ -200,6 +203,12 @@ public class MainActivity3 extends ActionBarActivity
     {
         private final ProgressDialog dialog = new ProgressDialog(MainActivity3.this);
         private NetworkAccessService oNAS = new NetworkAccessService();
+        private String mFileName;
+
+        public void setFileName(String name)
+        {
+            this.mFileName = name;
+        }
 
         @Override
         protected void onPreExecute()
@@ -213,7 +222,7 @@ public class MainActivity3 extends ActionBarActivity
         protected Void doInBackground(Bitmap... params)
         {
             Bitmap sig = params[0];
-            oNAS.UploadSignature(sig);
+            oNAS.UploadSignature(sig, mFileName);
             return null;
         }
         @Override
