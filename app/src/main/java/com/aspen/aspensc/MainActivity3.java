@@ -31,7 +31,7 @@ public class MainActivity3 extends ActionBarActivity
     private SignatureView sv;
     private Button btnClear;
     private Button btnCancel;
-
+    private String mfilename;
     private Button btnSave;
 
     @Override
@@ -77,9 +77,9 @@ public class MainActivity3 extends ActionBarActivity
 
                saveSig(sig);
                Bitmap[] signatures = {sig};
-               new UploadImage().execute(signatures);
-
-
+                UploadImage ui = new  UploadImage();
+                ui.filename = mfilename;
+                ui.execute(signatures);
             }
         });
     }
@@ -105,11 +105,8 @@ public class MainActivity3 extends ActionBarActivity
         {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
-
-
 
     private void saveSig(Bitmap image)
     {
@@ -157,8 +154,8 @@ public class MainActivity3 extends ActionBarActivity
             mediaStorageDir.mkdirs();
         }
         File mediaFile;
-        String mImageName = getCurrentTimeStamp() +".PNG";
-        mediaFile = new File(mediaStorageDir.getPath() + mImageName);
+         mfilename = getCurrentTimeStamp() +".PNG";
+        mediaFile = new File(mediaStorageDir.getPath() + mfilename);
         return mediaFile;
     }
 
@@ -200,6 +197,12 @@ public class MainActivity3 extends ActionBarActivity
     {
         private final ProgressDialog dialog = new ProgressDialog(MainActivity3.this);
         private NetworkAccessService oNAS = new NetworkAccessService();
+        public String filename;
+
+        public void setFileName(String filename)
+        {
+            this.filename = filename;
+        }
 
         @Override
         protected void onPreExecute()
@@ -212,8 +215,9 @@ public class MainActivity3 extends ActionBarActivity
         @Override
         protected Void doInBackground(Bitmap... params)
         {
+
             Bitmap sig = params[0];
-            oNAS.UploadSignature(sig);
+            oNAS.UploadSignature(sig, mfilename);
             return null;
         }
         @Override
