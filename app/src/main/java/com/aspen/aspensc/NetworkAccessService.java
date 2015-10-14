@@ -1,17 +1,13 @@
 package com.aspen.aspensc;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.BufferedReader;
@@ -19,6 +15,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import android.location.LocationManager;
+import android.location.LocationListener;
+import android.location.Location;
+
+//import org.apache.http.entity.ContentType;
+//import org.apache.http.entity.mime.MultipartEntityBuilder;
+//import org.apache.http.entity.mime.content.ContentBody;
 
 
 /**
@@ -26,13 +29,53 @@ import java.io.InputStreamReader;
  */
 public class NetworkAccessService
 {
+    private Context mContext;
+
+
+    public void SetContext(Context dataInput)
+    {
+        this.mContext = dataInput;
+    }
+
+
 
     public void UploadSignature(Bitmap sig, String filename)
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sig.compress(Bitmap.CompressFormat.PNG, 100, bos);
         byte[] imageData = bos.toByteArray();
-        String encodedImage;
+        String encodedImage = Base64.encodeToString(imageData, 0);
+        double latitude = 0.0;
+        double longitude = 0.0;
+
+        LocationManager locManager  = null;
+        LocationListener loc;
+
+        locManager = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
+        loc = new AspenLocation();
+        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, loc);
+
+        if (locManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
+            if (AspenLocation.mLatitude > 0)
+            {
+                latitude = AspenLocation.mLatitude;
+                longitude = AspenLocation.mLongitude;
+            }
+        }
+
+
+        Signature s = new Signature();
+        s.setBase64Signature(encodedImage);
+        s.setFilename(filename);
+        s.setOrderNumber(0);
+        s.setLatitude(latitude);
+        s.setLongitude(longitude);
+        //object setup
+
+
+
+
         String postMsg;
         String err;
 
@@ -43,24 +86,17 @@ public class NetworkAccessService
             String URL1 = "http://10.0.2.2:8080/Service1.svc/GetStream"; 
             HttpPost httpPost = new HttpPost(URL1);
 
-            ContentBody bin = null;
-            ByteArrayEntity Bae = new ByteArrayEntity(imageData);
-            httpPost.setEntity(Bae);
-
-            MultipartEntityBuilder mime = MultipartEntityBuilder.create();
-            mime.addBinaryBody("image", imageData, ContentType.APPLICATION_OCTET_STREAM, filename);
-
 
             try {
                 HttpResponse response = httpClient.execute(httpPost);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
                         response.getEntity().getContent(), "UTF-8"));
                 String sResponse;
-                StringBuilder s = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
 
                 while ((sResponse = reader.readLine()) != null)
                 {
-                    s = s.append(sResponse);
+                    sb = sb.append(sResponse);
                 }
                 //System.out.println("Response: " + s);
                 Log.i("Response:", s.toString());
@@ -76,44 +112,6 @@ public class NetworkAccessService
             e.printStackTrace();
         }
     }
-
-
-    public String Test(String id)
-    {
-        String result;
-        result = "bad request id: " + id;
-        // Making HTTP request
-
-        try {
-
-            DefaultHttpClient httpClient = new DefaultHttpClient();
-            //change
-            //String URL1 = "http://10.0.2.2:65007/RestService.svc/uploadImage/";
-            String URL1 = "http://10.0.2.2:8080/CanopyWebService.svc/GetResult/" + id; //TODO make this a variable that is defined in a settings screen
-
-            HttpGet httpget = new HttpGet(URL1);
-
-            HttpResponse response = httpClient.execute(httpget);
-            HttpEntity entity = response.getEntity();
-            if (entity != null)
-            {
-
-                // A Simple JSON Response Read
-                InputStream aa = entity.getContent();
-                result = convertStreamToString(aa);
-                // now you have the string representation of the HTML request
-                aa.close();
-
-            }
-
-        } catch (Exception e)
-        {
-            Log.e(e.getClass().getName(), e.getMessage());
-            e.printStackTrace();
-        }
-        return result;
-    }
-
 
     private static String convertStreamToString(InputStream is) {
     /*
@@ -140,18 +138,6 @@ public class NetworkAccessService
             }
         }
         return sb.toString();
-    }
-
-    public static byte[] getEncoded64ImageStringFromBitmap(Bitmap bitmap)
-    {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 70, stream);
-        byte[] byteFormat = stream.toByteArray();
-        // get the base 64 string
-        String imgString = Base64.encodeToString(byteFormat, Base64.NO_WRAP);
-
-        return imgString.getBytes();
-        //return imgString;
     }
 
 

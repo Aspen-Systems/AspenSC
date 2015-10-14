@@ -96,7 +96,6 @@ public class MainActivity extends ActionBarActivity
             String[] result = new String[10];
 
             String str = params[0].toString();
-            result[0] = oNAS.Test(str);
             return result;
         }
         @Override
