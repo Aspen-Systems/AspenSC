@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -73,13 +75,34 @@ public class MainActivity3 extends ActionBarActivity
         {
             public void onClick(View v)
             {
-               Bitmap sig = sv.getImage(R.id.signatureView);
-               Log.d(TAG, "Save"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
+                Bitmap sig = sv.getImage(R.id.signatureView);
+                Log.d(TAG, "Save"); //this writes to LogCat set filter to app: com.aspen.aspenSC to filter out other system processes
 
-               saveSig(sig);
-               Bitmap[] signatures = {sig};
+                saveSig(sig);
+                Bitmap[] signatures = {sig};
+                double latitude = 0.0;
+                double longitude = 0.0;
                 UploadImage ui = new  UploadImage();
+
+                LocationManager locManager  = null;
+                LocationListener loc;
+
+                locManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+                loc = new AspenLocation();
+                locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, loc);
+
+                if (locManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                {
+                    if (AspenLocation.mLatitude > 0)
+                    {
+                        latitude = AspenLocation.mLatitude;
+                        longitude = AspenLocation.mLongitude;
+                    }
+                }
+
                 ui.filename = mfilename;
+                ui.latitude = latitude;
+                ui.longitude = longitude;
                 ui.execute(signatures);
             }
         });
@@ -199,11 +222,12 @@ public class MainActivity3 extends ActionBarActivity
         private final ProgressDialog dialog = new ProgressDialog(MainActivity3.this);
         private NetworkAccessService oNAS = new NetworkAccessService();
         public String filename;
+        public double latitude;
+        public double longitude;
 
-        public void setFileName(String filename)
-        {
-            this.filename = filename;
-        }
+        public void setFileName(String filename) { this.filename = filename; }
+        public void setLatitude(double latitude) { this.latitude = latitude; }
+        public void setLongitude(double longitude) {this.longitude = longitude; }
 
         @Override
         protected void onPreExecute()
@@ -218,7 +242,7 @@ public class MainActivity3 extends ActionBarActivity
         {
 
             Bitmap sig = params[0];
-            oNAS.UploadSignature(sig, mfilename);
+            oNAS.UploadSignature(sig, mfilename, latitude, longitude);
             return null;
         }
         @Override

@@ -2,12 +2,15 @@ package com.aspen.aspensc;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.BufferedReader;
@@ -15,9 +18,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import android.location.LocationManager;
-import android.location.LocationListener;
-import android.location.Location;
 
 //import org.apache.http.entity.ContentType;
 //import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -39,30 +39,12 @@ public class NetworkAccessService
 
 
 
-    public void UploadSignature(Bitmap sig, String filename)
+    public void UploadSignature(Bitmap sig, String filename, double latitude, double longitude)
     {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         sig.compress(Bitmap.CompressFormat.PNG, 100, bos);
         byte[] imageData = bos.toByteArray();
         String encodedImage = Base64.encodeToString(imageData, 0);
-        double latitude = 0.0;
-        double longitude = 0.0;
-
-        LocationManager locManager  = null;
-        LocationListener loc;
-
-        locManager = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
-        loc = new AspenLocation();
-        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, loc);
-
-        if (locManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-        {
-            if (AspenLocation.mLatitude > 0)
-            {
-                latitude = AspenLocation.mLatitude;
-                longitude = AspenLocation.mLongitude;
-            }
-        }
 
 
         Signature s = new Signature();
@@ -74,6 +56,8 @@ public class NetworkAccessService
         //object setup
 
 
+        Gson gson = new Gson();
+        String jsonStr = gson.toJson(s);
 
 
         String postMsg;
@@ -81,13 +65,16 @@ public class NetworkAccessService
 
         // Making HTTP request
         try {
-
-            DefaultHttpClient httpClient = new DefaultHttpClient();
+            String result = "";
+            HttpClient httpClient = new DefaultHttpClient();
             String URL1 = "http://10.0.2.2:8080/Service1.svc/GetStream"; 
             HttpPost httpPost = new HttpPost(URL1);
-
+            StringEntity se  = new StringEntity(jsonStr);
+            httpPost.setEntity(se);
 
             try {
+                httpPost.setHeader("Accept", "application/json");
+                httpPost.setHeader("Content-type", "application/json");
                 HttpResponse response = httpClient.execute(httpPost);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
                         response.getEntity().getContent(), "UTF-8"));

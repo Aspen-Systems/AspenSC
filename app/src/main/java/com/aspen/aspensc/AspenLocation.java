@@ -15,6 +15,22 @@ public class AspenLocation implements LocationListener
     public static double mLatitude;
     public static double mLongitude;
 
+    public static double getLongitude() {
+        return mLongitude;
+    }
+
+    public static void setLongitude(double mLongitude) {
+        AspenLocation.mLongitude = mLongitude;
+    }
+
+    public static double getLatitude() {
+        return mLatitude;
+    }
+
+    public static void setLatitude(double mLatitude) {
+        AspenLocation.mLatitude = mLatitude;
+    }
+
     @Override
     public void onLocationChanged(Location loc)
     {
